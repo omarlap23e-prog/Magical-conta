@@ -1,163 +1,225 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Menu } from "lucide-react";
 
-const cuentas = [
-  // Activo circulante
-  { nombre: "Caja", tipo: "Activo circulante" },
-  { nombre: "Bancos", tipo: "Activo circulante" },
-  { nombre: "Inversiones temporales", tipo: "Activo circulante" },
-  { nombre: "Clientes", tipo: "Activo circulante" },
-  { nombre: "Documentos por cobrar", tipo: "Activo circulante" },
-  { nombre: "Deudores diversos", tipo: "Activo circulante" },
-  { nombre: "Inventarios (almacén/mercancías)", tipo: "Activo circulante" },
-  { nombre: "Anticipo a proveedores", tipo: "Activo circulante" },
-  { nombre: "Gastos pagados por anticipado", tipo: "Activo circulante" },
+export default function RedFCA() {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null); // asesor o estudiante
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [view, setView] = useState("inicio");
+  const [materia, setMateria] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [materiasAsesor, setMateriasAsesor] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [chatOpen, setChatOpen] = useState(null);
+  const [mensaje, setMensaje] = useState("");
 
-  // Activo no circulante
-  { nombre: "Terrenos", tipo: "Activo no circulante" },
-  { nombre: "Edificios", tipo: "Activo no circulante" },
-  { nombre: "Mobiliario y equipo de oficina", tipo: "Activo no circulante" },
-  { nombre: "Equipo de transporte", tipo: "Activo no circulante" },
-  { nombre: "Depreciación acumulada (cuenta correctiva)", tipo: "Activo no circulante" },
-  { nombre: "Marcas y patentes", tipo: "Activo no circulante" },
-
-  // Pasivo corto plazo
-  { nombre: "Proveedores", tipo: "Pasivo a corto plazo" },
-  { nombre: "Documentos por pagar", tipo: "Pasivo a corto plazo" },
-  { nombre: "Acreedores diversos", tipo: "Pasivo a corto plazo" },
-  { nombre: "Anticipo de clientes", tipo: "Pasivo a corto plazo" },
-  { nombre: "IVA por pagar", tipo: "Pasivo a corto plazo" },
-  { nombre: "ISR por pagar", tipo: "Pasivo a corto plazo" },
-  { nombre: "Sueldos por pagar", tipo: "Pasivo a corto plazo" },
-  { nombre: "Préstamos bancarios a corto plazo", tipo: "Pasivo a corto plazo" },
-
-  // Pasivo largo plazo
-  { nombre: "Préstamos bancarios a largo plazo", tipo: "Pasivo a largo plazo" },
-
-  // Capital contable
-  { nombre: "Capital social", tipo: "Capital contable" },
-  { nombre: "Reserva legal", tipo: "Capital contable" },
-  { nombre: "Utilidad del ejercicio", tipo: "Capital contable" },
-  { nombre: "Pérdida del ejercicio", tipo: "Capital contable" },
-  { nombre: "Resultados acumulados", tipo: "Capital contable" },
-];
-
-function shuffleArray(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-const modos = [
-  { nombre: "Todo mezclado", filter: () => true, opciones: ["Activo circulante","Activo no circulante","Pasivo a corto plazo","Pasivo a largo plazo","Capital contable"] },
-  { nombre: "Por tipo de activo", filter: c => c.tipo.includes("Activo"), opciones: ["Activo circulante","Activo no circulante"] },
-  { nombre: "Por tipo de pasivo", filter: c => c.tipo.includes("Pasivo"), opciones: ["Pasivo a corto plazo","Pasivo a largo plazo"] },
-  { nombre: "Reto de velocidad", filter: () => true, opciones: ["Activo circulante","Activo no circulante","Pasivo a corto plazo","Pasivo a largo plazo","Capital contable"] },
-  { nombre: "Modo examen", filter: () => true, opciones: ["Activo circulante","Activo no circulante","Pasivo a corto plazo","Pasivo a largo plazo","Capital contable"] }
-];
-
-export default function MagicaLConta() {
-  const [iniciado, setIniciado] = useState(false);
-  const [modo, setModo] = useState(null);
-  const [deck, setDeck] = useState([]);
-  const [indice, setIndice] = useState(0);
-  const [seleccion, setSeleccion] = useState("");
-  const [respuesta, setRespuesta] = useState(null);
-  const [correctas, setCorrectas] = useState(0);
-  const [terminado, setTerminado] = useState(false);
-
-  const iniciarJuego = (modoSeleccionado) => {
-    const nuevoDeck = shuffleArray(cuentas.filter(modoSeleccionado.filter));
-    setDeck(nuevoDeck);
-    setIndice(0);
-    setCorrectas(0);
-    setSeleccion("");
-    setRespuesta(null);
-    setModo(modoSeleccionado);
-    setIniciado(true);
-    setTerminado(false);
+  const login = () => {
+    setUser({
+      id: 1,
+      nombre: "Estudiante FCA",
+      semestre: "3er semestre",
+      promedio: 90,
+    });
   };
 
-  const cuentaActual = deck[indice];
+  const publicarAsesoria = () => {
+    if (!materia || !descripcion) return;
 
-  const verificarRespuesta = (opcion) => {
-    setSeleccion(opcion);
-    const esCorrecta = opcion === cuentaActual.tipo;
-    setRespuesta(esCorrecta);
-    if (esCorrecta) setCorrectas(prev => prev + 1);
+    const nueva = {
+      id: Date.now(),
+      materia,
+      descripcion,
+      solicitante: user,
+      asesor: null,
+      estado: "Pendiente",
+      mensajes: [],
+    };
+
+    setPosts([nueva, ...posts]);
+    setMateria("");
+    setDescripcion("");
+    setView("misAsesorias");
   };
 
-  const siguiente = () => {
-    const siguienteIndice = indice + 1;
-    if (siguienteIndice >= deck.length) {
-      setTerminado(true);
-    } else {
-      setIndice(siguienteIndice);
-      setSeleccion("");
-      setRespuesta(null);
-    }
+  const aceptarSolicitud = (post) => {
+    const actualizado = posts.map((p) =>
+      p.id === post.id ? { ...p, asesor: user, estado: "En acuerdo" } : p,
+    );
+    setPosts(actualizado);
+    setChatOpen(post.id);
   };
 
-  if (!iniciado) {
+  const enviarMensaje = (postId) => {
+    if (!mensaje) return;
+
+    const actualizado = posts.map((p) =>
+      p.id === postId
+        ? {
+            ...p,
+            mensajes: [...p.mensajes, { autor: user.nombre, texto: mensaje }],
+          }
+        : p,
+    );
+
+    setPosts(actualizado);
+    setMensaje("");
+  };
+
+  const agregarMateriaAsesor = () => {
+    if (!materia) return;
+    setMateriasAsesor([...materiasAsesor, materia]);
+    setMateria("");
+  };
+
+  if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-100 to-green-100">
-        <h1 className="text-4xl font-bold mb-6">MagicaL Conta</h1>
-        <p className="mb-4">Elige un modo de práctica:</p>
-        <div className="grid gap-4">
-          {modos.map(m => (
-            <Button key={m.nombre} onClick={() => iniciarJuego(m)}>{m.nombre}</Button>
-          ))}
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <Card className="rounded-2xl p-6 shadow-xl">
+          <CardContent className="space-y-4">
+            <h1 className="text-3xl font-bold">Red FCA</h1>
+            <Button onClick={login}>Entrar con @uach.mx</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (terminado) {
+  if (!role) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-purple-100 to-pink-100">
-        <h1 className="text-3xl font-bold mb-6">¡Juego terminado!</h1>
-        <p className="text-xl mb-4">Tu calificación: {correctas} / {deck.length}</p>
-        <Button onClick={() => iniciarJuego(modo)}>Jugar de nuevo</Button>
-        <Button onClick={() => { setIniciado(false); setModo(null); }} className="mt-2">Volver al menú</Button>
+      <div className="flex min-h-screen items-center justify-center gap-6 bg-gray-100">
+        <Button onClick={() => setRole("asesor")}>Iniciar como Asesor</Button>
+        <Button onClick={() => setRole("estudiante")}>Iniciar como Estudiante</Button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-purple-100 to-pink-100">
-      <motion.div
-        className={`p-10 rounded-2xl shadow-xl mb-6 text-center w-96 transition-colors duration-500 ${
-          respuesta === null ? "bg-white" : respuesta ? "bg-green-300" : "bg-red-300"
-        }`}
-        whileHover={{ scale: 1.05 }}
-      >
-        <h2 className="text-2xl font-bold">{cuentaActual.nombre}</h2>
-      </motion.div>
-
-      <div className="grid grid-cols-1 gap-4 w-80">
-        {modo.opciones.map((opcion) => (
-          <Button
-            key={opcion}
-            variant={seleccion === opcion ? "default" : "outline"}
-            onClick={() => verificarRespuesta(opcion)}
-            disabled={respuesta !== null}
-          >
-            {opcion}
-          </Button>
-        ))}
+    <div className="min-h-screen bg-gray-100">
+      <div className="flex items-center justify-between bg-white p-4 shadow">
+        <h1 className="font-bold">Red FCA</h1>
+        <Menu className="cursor-pointer" onClick={() => setMenuOpen(!menuOpen)} />
       </div>
 
-      {respuesta !== null && (
-        <div className="mt-6">
-          <Button onClick={siguiente}>Siguiente</Button>
+      {menuOpen && (
+        <div className="absolute right-4 top-16 w-64 space-y-3 rounded-2xl bg-white p-4 shadow-xl">
+          <Button className="w-full" onClick={() => setView("perfil")}>
+            Mi Perfil
+          </Button>
+          {role === "estudiante" && (
+            <Button className="w-full" onClick={() => setView("publicar")}>
+              Publicar Asesoría
+            </Button>
+          )}
+          <Button className="w-full" onClick={() => setView("disponibles")}>
+            Asesorías Disponibles
+          </Button>
+          <Button className="w-full" onClick={() => setView("misAsesorias")}>
+            Mis Asesorías
+          </Button>
         </div>
       )}
 
-      <div className="mt-6 text-sm text-gray-600">Correctas: {correctas} / {deck.length}</div>
+      <div className="p-8">
+        {view === "perfil" && (
+          <Card className="space-y-4 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold">Perfil</h2>
+            <p>Nombre: {user.nombre}</p>
+            <p>Semestre: {user.semestre}</p>
+            <p>Promedio: {user.promedio}</p>
+
+            {role === "asesor" && (
+              <>
+                <h3 className="mt-4 font-semibold">Materias que domino</h3>
+                <div className="flex gap-2">
+                  <Input
+                    value={materia}
+                    onChange={(e) => setMateria(e.target.value)}
+                    placeholder="Agregar materia"
+                  />
+                  <Button onClick={agregarMateriaAsesor}>Agregar</Button>
+                </div>
+                <ul>
+                  {materiasAsesor.map((m, i) => (
+                    <li key={i}>• {m}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Card>
+        )}
+
+        {view === "publicar" && role === "estudiante" && (
+          <Card className="space-y-4 rounded-2xl p-6 shadow-lg">
+            <h2 className="font-bold">Publicar necesidad de asesoría</h2>
+            <Input
+              placeholder="Materia"
+              value={materia}
+              onChange={(e) => setMateria(e.target.value)}
+            />
+            <Textarea
+              placeholder="Describe tu duda"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+            />
+            <Button onClick={publicarAsesoria}>Publicar</Button>
+          </Card>
+        )}
+
+        {view === "disponibles" && (
+          <div className="grid gap-6 md:grid-cols-2">
+            {posts.map((post) => (
+              <Card key={post.id} className="space-y-2 rounded-2xl p-4 shadow-lg">
+                <h3 className="font-bold">{post.materia}</h3>
+                <p>{post.descripcion}</p>
+                <p>Solicita: {post.solicitante.nombre}</p>
+                {role === "asesor" && !post.asesor && (
+                  <Button onClick={() => aceptarSolicitud(post)}>
+                    Aceptar y chatear
+                  </Button>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {view === "misAsesorias" && (
+          <div className="space-y-4">
+            {posts
+              .filter((p) => p.solicitante.id === user.id || p.asesor?.id === user.id)
+              .map((post) => (
+                <Card key={post.id} className="space-y-2 rounded-2xl p-4 shadow-lg">
+                  <h3 className="font-bold">{post.materia}</h3>
+                  <p>Estado: {post.estado}</p>
+                  {post.asesor && <p>Asesor: {post.asesor.nombre}</p>}
+
+                  {chatOpen === post.id && (
+                    <div className="space-y-2 rounded-xl bg-gray-100 p-3">
+                      <div className="h-32 overflow-y-auto rounded bg-white p-2">
+                        {post.mensajes.map((m, i) => (
+                          <p key={i}>
+                            <strong>{m.autor}:</strong> {m.texto}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          value={mensaje}
+                          onChange={(e) => setMensaje(e.target.value)}
+                          placeholder="Escribe mensaje"
+                        />
+                        <Button onClick={() => enviarMensaje(post.id)}>Enviar</Button>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
